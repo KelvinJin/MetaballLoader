@@ -13,6 +13,9 @@
 		290540C51AE6821800D74B8D /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 290540C41AE6821800D74B8D /* Images.xcassets */; };
 		290540C81AE6821800D74B8D /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 290540C61AE6821800D74B8D /* LaunchScreen.xib */; };
 		290540D41AE6821900D74B8D /* MetaSpinExampleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 290540D31AE6821900D74B8D /* MetaSpinExampleTests.swift */; };
+		290540DF1AE6823700D74B8D /* MetaField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 290540DE1AE6823700D74B8D /* MetaField.swift */; };
+		290540E11AE6824300D74B8D /* MetaSpin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 290540E01AE6824300D74B8D /* MetaSpin.swift */; };
+		290540E31AE6824900D74B8D /* MetaBall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 290540E21AE6824900D74B8D /* MetaBall.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,6 +39,9 @@
 		290540CD1AE6821900D74B8D /* MetaSpinExampleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MetaSpinExampleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		290540D21AE6821900D74B8D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		290540D31AE6821900D74B8D /* MetaSpinExampleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetaSpinExampleTests.swift; sourceTree = "<group>"; };
+		290540DE1AE6823700D74B8D /* MetaField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetaField.swift; sourceTree = "<group>"; };
+		290540E01AE6824300D74B8D /* MetaSpin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetaSpin.swift; sourceTree = "<group>"; };
+		290540E21AE6824900D74B8D /* MetaBall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetaBall.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,6 +83,7 @@
 		290540BA1AE6821800D74B8D /* MetaSpinExample */ = {
 			isa = PBXGroup;
 			children = (
+				290540DD1AE6822800D74B8D /* Meta */,
 				290540BD1AE6821800D74B8D /* AppDelegate.swift */,
 				290540BF1AE6821800D74B8D /* ViewController.swift */,
 				290540C11AE6821800D74B8D /* Main.storyboard */,
@@ -110,6 +117,16 @@
 				290540D21AE6821900D74B8D /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		290540DD1AE6822800D74B8D /* Meta */ = {
+			isa = PBXGroup;
+			children = (
+				290540DE1AE6823700D74B8D /* MetaField.swift */,
+				290540E01AE6824300D74B8D /* MetaSpin.swift */,
+				290540E21AE6824900D74B8D /* MetaBall.swift */,
+			);
+			name = Meta;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -214,6 +231,9 @@
 			files = (
 				290540C01AE6821800D74B8D /* ViewController.swift in Sources */,
 				290540BE1AE6821800D74B8D /* AppDelegate.swift in Sources */,
+				290540E31AE6824900D74B8D /* MetaBall.swift in Sources */,
+				290540E11AE6824300D74B8D /* MetaSpin.swift in Sources */,
+				290540DF1AE6823700D74B8D /* MetaField.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

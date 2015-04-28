@@ -11,19 +11,19 @@ import GLKit
 
 class MetaSpin: UIView {
     
-    var centralBallRadius: CGFloat = 30 {
+    var centralBallRadius: CGFloat = 50 {
         didSet {
             centralBall.radius = centralBallRadius
-            cruiseRadius = (centralBallRadius + sideBallRadius) / 2 * 1.5
+            cruiseRadius = (centralBallRadius + sideBallRadius) / 2 * 1.3
         }
     }
-    var sideBallRadius: CGFloat = 16 {
+    var sideBallRadius: CGFloat = 10 {
         didSet {
             self.sideBall.radius = sideBallRadius
-            cruiseRadius = (centralBallRadius + sideBallRadius) / 2 * 1.5
+            cruiseRadius = (centralBallRadius + sideBallRadius) / 2 * 1.3
         }
     }
-    var cruiseRadius: CGFloat = 35
+    var cruiseRadius: CGFloat = 50
     var ballFillColor: UIColor = UIColor.whiteColor() {
         didSet {
             self.metaField.ballFillColor = ballFillColor
@@ -61,7 +61,7 @@ class MetaSpin: UIView {
     }
     
     private func addSideBall() {
-        sideBall = MetaBall(center: center, radius: sideBallRadius)
+        sideBall = MetaBall(center: CGPoint(x: center.x, y: center.y), radius: sideBallRadius)
         
         metaField.addMetaBall(sideBall)
     }
@@ -83,6 +83,8 @@ class MetaSpin: UIView {
         
         let displayLink = CADisplayLink(target: self, selector: "moveSideBall")
         
+        // displayLink.frameInterval = 60 / 24
+        
         displayLink.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
     }
     
@@ -93,16 +95,16 @@ class MetaSpin: UIView {
     func moveSideBall() {
         nextAngle()
         
-        sideBall.center = newCenter(toEaseIn(currentAngle))
+        sideBall.center = newCenter(toEaseIn(toEaseIn(currentAngle)))
         
         metaField.setNeedsDisplay()
     }
     
-    func newCenter(angle: CGFloat) -> CGPoint {
-        let x = centralBall.center.x + cruiseRadius * (flip ? -sin(angle) : sin(angle))
-        let y = centralBall.center.y + (flip ? cruiseRadius : -cruiseRadius) + cruiseRadius * (flip ? -cos(angle) : cos(angle))
+    func newCenter(angle: CGFloat) -> GLKVector2 {
+        let x = centralBall.center.x + Float(cruiseRadius) * Float(flip ? -sin(angle) : sin(angle))
+        let y = centralBall.center.y + Float(flip ? cruiseRadius : -cruiseRadius) + Float(cruiseRadius) * Float(flip ? -cos(angle) : cos(angle))
         
-        return CGPoint(x: x, y: y)
+        return GLKVector2Make(x, y)
     }
     
     private func nextAngle(){

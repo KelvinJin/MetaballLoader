@@ -14,28 +14,37 @@ let DistanceConstant: CGFloat = 2.0
 let MaximumForce: CGFloat = 10000
 
 class MetaBall: NSObject {
-    dynamic var center: CGPoint
+    dynamic var center: GLKVector2
     var radius: CGFloat {
         didSet {
-            self.mess = ForceConstant * CGFloat(M_PI) * radius * radius
+            self.mess = radius // ForceConstant * CGFloat(M_PI) * radius * radius
         }
     }
     private(set) var mess: CGFloat
     
-    init(center: CGPoint, radius: CGFloat) {
-        self.center = center
-        self.radius = radius
-        self.mess = ForceConstant * CGFloat(M_PI) * radius * radius
+    var borderPosition = GLKVector2Make(0, 0)
+    var trackingPosition = GLKVector2Make(0, 0)
+    var tracking = false
+    var borderPath: CGMutablePathRef!
+    var shapeLayer: CAShapeLayer = CAShapeLayer()
+    
+    convenience init(center: CGPoint, radius: CGFloat) {
+        let centerVector = GLKVector2Make(Float(center.x), Float(center.y))
+        self.init(centerVector: centerVector, radius: radius)
     }
     
-    func forceAt(position: CGPoint) -> CGFloat {
-        var div = pow(distance(center, toPoint: position) , DistanceConstant)
+    init(centerVector: GLKVector2, radius: CGFloat) {
+        self.center = centerVector
+        self.radius = radius
+        self.mess = radius // ForceConstant * CGFloat(M_PI) * radius * radius
+    }
+    
+    func forceAt(position: GLKVector2) -> CGFloat {
+        var div = pow(distance(center, position) , DistanceConstant)
         return div == 0 ? MaximumForce : mess / div
     }
-    
-    private func distance(fromPoint: CGPoint, toPoint: CGPoint) -> CGFloat {
-        let difX = fromPoint.x - toPoint.x
-        let difY = fromPoint.y - toPoint.y
-        return sqrt(difX * difX + difY * difY)
-    }
+}
+
+func distance(fromPoint: GLKVector2, toPoint: GLKVector2) -> CGFloat {
+    return CGFloat(GLKVector2Distance(fromPoint, toPoint))
 }

@@ -9,45 +9,20 @@
 import UIKit
 import GLKit
 
+private let rungKutaStep: Float = 5.0
+
 class MetaField: UIView {
     
-    var fieldThreshold: CGFloat = ForceConstant * CGFloat(M_PI)
+    var fieldThreshold: CGFloat = 0.04
     
-    // Create a bitmap context
-    let bytesPerPixel: Int = 4
-    let bitsPerComponent: Int = 8
-    let colorSpace = CGColorSpaceCreateDeviceRGB()
-    let bitmapInfo = CGBitmapInfo(CGImageAlphaInfo.PremultipliedFirst.rawValue)
-    var bytesPerRow: Int!
-    var data: UnsafeMutablePointer<UInt8>!
+    var ballFillColor: UIColor = UIColor.blackColor()
     
-    private var colorRed: UInt8 = 255
-    private var colorGreen: UInt8 = 255
-    private var colorBlue: UInt8 = 255
-    
-    var ballFillColor: UIColor {
-        get {
-            return UIColor(red: CGFloat(colorRed / 255), green: CGFloat(colorGreen / 255), blue: CGFloat(colorBlue / 255), alpha: 1.0)
-        }
-        set {
-            var red: CGFloat = 0
-            var green: CGFloat = 0
-            var blue: CGFloat = 0
-            var alpha: CGFloat = 0
-            newValue.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-            self.colorRed = UInt8(red * 255)
-            self.colorGreen = UInt8(green * 255)
-            self.colorBlue = UInt8(blue * 255)
-        }
-    }
+    private var minSizeBall: CGFloat = 0
     
     private(set) var metaBalls: [MetaBall] = []
     
     override init(frame: CGRect) {
         let rect = CGRect(x: frame.minX, y: frame.minY, width: CGFloat(Int(frame.width)), height: CGFloat(Int(frame.height)))
-        
-        bytesPerRow = Int(frame.width) * bitsPerComponent * bytesPerPixel / 8
-        data = UnsafeMutablePointer<UInt8>.alloc(bytesPerRow * Int(frame.height))
         
         super.init(frame: rect)
     }
@@ -58,65 +33,151 @@ class MetaField: UIView {
     
     func addMetaBallAt(position: CGPoint, radius: CGFloat) {
         let newBall = MetaBall(center: position, radius: radius)
-        
-        metaBalls.append(newBall)
+        addMetaBall(newBall)
     }
     
     func addMetaBall(metaBall: MetaBall) {
         metaBalls.append(metaBall)
+        updateMinSize()
         setNeedsDisplay()
     }
     
+    private func updateMinSize() {
+        minSizeBall = 100000
+        for metaBall in metaBalls {
+            if metaBall.mess < minSizeBall {
+                minSizeBall = metaBall.mess
+            }
+        }
+    }
     
     override func drawRect(rect: CGRect) {
-        let width = Int(bounds.width)
-        let height = Int(bounds.height)
         
-        let bitmapContext = myBitmapContext()
+        let ctx = UIGraphicsGetCurrentContext()
+        CGContextSaveGState(ctx)
         
-        // Loop through all the points
-        for i in 0..<height {
-            for j in 0..<width {
-                let pointVector = CGPoint(x: j, y: i)
-                let pointIndex = i * bytesPerRow + j * bytesPerPixel
-                
-                // Reset the current total force
-                var totalForce: CGFloat = 0
-                
-                // Loop through the meta balls and calculate the total force
-                for metaBall in metaBalls {
-                    totalForce += metaBall.forceAt(pointVector)
+        for metaBall in metaBalls {
+            metaBall.trackingPosition = trackTheBorder(GLKVector2Add(metaBall.center, GLKVector2Make(0, 1)))
+            metaBall.borderPosition = metaBall.trackingPosition
+            
+            metaBall.tracking = true
+            metaBall.borderPath = CGPathCreateMutable()
+        }
+        
+        for metaBall in metaBalls {
+            
+            CGContextMoveToPoint(ctx, CGFloat(metaBall.borderPosition.x), CGFloat(metaBall.borderPosition.y))
+            for i in 0..<1000 {
+            
+                if !metaBall.tracking {
+                    break
                 }
                 
-                // If the force is over the threshold, draw white
-                if totalForce > fieldThreshold {
-                    data[pointIndex + 0] = 1
-                    data[pointIndex + 1] = colorRed
-                    data[pointIndex + 2] = colorGreen
-                    data[pointIndex + 3] = colorBlue
+                // Store the old tracking position
+                let oldPosition = metaBall.trackingPosition
+                
+                // Walk along the tangent
+                metaBall.trackingPosition = rungeKutta2(metaBall.trackingPosition, h: rungKutaStep, targetFunction: {
+                    let tenant = self.tangentAt($0)
+                    return tenant
+                })
+                
+                let tmp: CGFloat
+                // Correction step towards the border
+                (metaBall.trackingPosition, tmp) = stepOnceTowardsBorder(metaBall.trackingPosition)
+                
+                
+                CGContextAddLineToPoint(ctx, CGFloat(metaBall.trackingPosition.x), CGFloat(metaBall.trackingPosition.y))
+                
+                
+                // Check if we've gone a full circle or hit some other edge tracker
+                for otherBall in metaBalls {
+                    if (otherBall !== metaBall || i > 3) && GLKVector2Distance(otherBall.borderPosition, metaBall.trackingPosition) < rungKutaStep {
+                        // CGPathCloseSubpath(metaBall.borderPath)
+                        if otherBall !== metaBall {
+                            CGContextAddLineToPoint(ctx, CGFloat(otherBall.borderPosition.x), CGFloat(otherBall.borderPosition.y))
+                        } else {
+                            CGContextClosePath(ctx)
+                        }
+                        
+                        metaBall.tracking = false
+                    }
                 }
             }
         }
         
-        let imageRef = CGBitmapContextCreateImage(bitmapContext)
+        // Add path into current context
+        ballFillColor.set()
         
-        let myContext = UIGraphicsGetCurrentContext()
-        CGContextSaveGState(myContext)
+        CGContextFillPath(ctx)
         
-        CGContextClearRect(myContext, rect)
-        
-        CGContextDrawImage(myContext, rect, imageRef)
-        
-        CGContextRestoreGState(myContext)
-        
-        memset(data, 0, bytesPerRow * Int(frame.height))
+        CGContextRestoreGState(ctx)
     }
     
-    private func myBitmapContext() -> CGContextRef {
-        let width = Int(bounds.width)
-        let height = Int(bounds.height)
-        let ctx = CGBitmapContextCreate(data, width, height, bitsPerComponent, bytesPerRow, colorSpace, bitmapInfo)
+    private func trackTheBorder(var position: GLKVector2) -> GLKVector2 {
+        // Track the border of the metaball and return new coordinates
+        var currentForce: CGFloat = 1000000
         
-        return ctx
+        while currentForce > fieldThreshold {
+            (position, currentForce) = stepOnceTowardsBorder(position)
+            
+            if !bounds.contains(CGPoint(x: CGFloat(position.x), y: CGFloat(position.y))) {
+                continue
+            }
+        }
+        
+        return position
+    }
+    
+    private func stepOnceTowardsBorder(position: GLKVector2) -> (GLKVector2, CGFloat) {
+        // Step once towards the border of the metaball field, return the new coordinates and force at old coordinates.
+        let force = forceAt(position)
+        let np = normalAt(position)
+        
+        let stepSize = pow(minSizeBall / fieldThreshold, 1 / DistanceConstant) -
+            pow(minSizeBall / force, 1 / DistanceConstant) + 0.01
+        return (GLKVector2Add(position, GLKVector2MultiplyScalar(np, Float(stepSize))), force)
+    }
+    
+    private func tangentAt(position: GLKVector2) -> GLKVector2 {
+        // Normalized (length = 1) tangent at position
+        let np = normalAt(position)
+        
+        return GLKVector2Make(-np.y, np.x)
+    }
+    
+    private func normalAt(position: GLKVector2) -> GLKVector2 {
+        // Normalized (length = 1) normal at position
+        
+        var totalNormal = GLKVector2Make(0, 0)
+        
+        // Loop through the meta balls
+        for metaBall in metaBalls {
+            let div = pow(GLKVector2Distance(metaBall.center, position), Float(2 + DistanceConstant))
+            let addition = GLKVector2MultiplyScalar(GLKVector2Subtract(metaBall.center, position),
+                Float(-DistanceConstant * metaBall.mess) / div)
+            totalNormal = GLKVector2Add(totalNormal, addition)
+        }
+        
+        return GLKVector2Normalize(totalNormal)
+    }
+    
+    private func forceAt(position: GLKVector2) -> CGFloat {
+        var totalForce: CGFloat = 0
+        
+        // Loop through the meta balls and calculate the total force
+        for metaBall in metaBalls {
+            totalForce += metaBall.forceAt(position)
+        }
+        
+        return totalForce
+    }
+    
+    private func rungeKutta2(position: GLKVector2, h: Float, targetFunction: GLKVector2 -> GLKVector2) -> GLKVector2 {
+        let oneTime = GLKVector2MultiplyScalar(targetFunction(position), h / 2)
+        let nextInput = GLKVector2Add(position, oneTime)
+        let twoTime = GLKVector2MultiplyScalar(targetFunction(nextInput), h)
+        
+        return GLKVector2Add(position, twoTime)
     }
 }

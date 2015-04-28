@@ -14,14 +14,14 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        let metaSpin = MetaSpin(frame: CGRect(x: 0, y: 0, width: 200, height: 200))
+        let metaSpin = MetaSpin(frame: CGRect(x: 0, y: 0, width: 300, height: 300))
         metaSpin.center = view.center
-        metaSpin.ballFillColor = UIColor(red: 211/255, green: 84/255, blue: 0/255, alpha: 1.0)
-        metaSpin.centralBallRadius = 30.0
+        metaSpin.ballFillColor = UIColor(red: 189/255, green: 195/255, blue: 199/255, alpha: 1.0)
+        metaSpin.centralBallRadius = 50.0
         metaSpin.sideBallRadius = 15.0
-        metaSpin.speed = 0.06
+        metaSpin.speed = 0.016
         
-        view.backgroundColor = UIColor(red: 52/255, green: 152/255, blue: 219/255, alpha: 1.0)
+        view.backgroundColor = UIColor(red: 52/255, green: 73/255, blue: 94/255, alpha: 1.0)
         
         view.addSubview(metaSpin)
         

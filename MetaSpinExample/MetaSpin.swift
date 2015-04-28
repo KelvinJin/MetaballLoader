@@ -11,10 +11,25 @@ import GLKit
 
 class MetaSpin: UIView {
     
-    var centralBallRadius: CGFloat = 20
-    var sideBallRadius: CGFloat = 12
-    var cruiseRadius: CGFloat = 25
-    var ballFillColor: UIColor = UIColor.whiteColor()
+    var centralBallRadius: CGFloat = 30 {
+        didSet {
+            centralBall.radius = centralBallRadius
+            cruiseRadius = (centralBallRadius + sideBallRadius) / 2 * 1.5
+        }
+    }
+    var sideBallRadius: CGFloat = 16 {
+        didSet {
+            self.sideBall.radius = sideBallRadius
+            cruiseRadius = (centralBallRadius + sideBallRadius) / 2 * 1.5
+        }
+    }
+    var cruiseRadius: CGFloat = 35
+    var ballFillColor: UIColor = UIColor.whiteColor() {
+        didSet {
+            self.metaField.ballFillColor = ballFillColor
+        }
+    }
+    var speed: CGFloat = 0.06
     
     private var centralBall: MetaBall!
     private var sideBall: MetaBall!
@@ -24,9 +39,10 @@ class MetaSpin: UIView {
         super.init(frame: frame)
         
         // Set backgrounds
-        backgroundColor = UIColor.blackColor()
+        backgroundColor = UIColor.clearColor()
         
         metaField = MetaField(frame: frame)
+        metaField.backgroundColor = UIColor.clearColor()
         
         addCentralBall()
         addSideBall()
@@ -71,10 +87,11 @@ class MetaSpin: UIView {
     }
     
     var currentAngle = CGFloat(0)
-    var flip = true
+    var maxAngle = CGFloat(2.0 * M_PI)
+    var flip = false
     
     func moveSideBall() {
-        currentAngle = to2pi(currentAngle + CGFloat(2 * M_PI / 120))
+        nextAngle()
         
         sideBall.center = newCenter(toEaseIn(currentAngle))
         
@@ -82,16 +99,20 @@ class MetaSpin: UIView {
     }
     
     func newCenter(angle: CGFloat) -> CGPoint {
-        let x = centralBall.center.x + cruiseRadius * cos(angle)
-        let y = centralBall.center.y + (flip ? cruiseRadius : -cruiseRadius) + cruiseRadius * sin(angle)
+        let x = centralBall.center.x + cruiseRadius * (flip ? -sin(angle) : sin(angle))
+        let y = centralBall.center.y + (flip ? cruiseRadius : -cruiseRadius) + cruiseRadius * (flip ? -cos(angle) : cos(angle))
         
         return CGPoint(x: x, y: y)
     }
     
-    private func to2pi(angle: CGFloat) -> CGFloat {
-        let factor = Int(angle / 2 / CGFloat(M_PI))
-        if factor >= 1 { flip = !flip }
-        return angle - CGFloat(factor) * 2 * CGFloat(M_PI)
+    private func nextAngle(){
+        if currentAngle >= maxAngle {
+            currentAngle = 0
+            flip = !flip
+        } else {
+            currentAngle += CGFloat(maxAngle * speed)
+        }
+        
     }
     
     private func toEaseIn(angle: CGFloat) -> CGFloat {

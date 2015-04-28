@@ -21,6 +21,26 @@ class MetaField: UIView {
     var bytesPerRow: Int!
     var data: UnsafeMutablePointer<UInt8>!
     
+    private var colorRed: UInt8 = 255
+    private var colorGreen: UInt8 = 255
+    private var colorBlue: UInt8 = 255
+    
+    var ballFillColor: UIColor {
+        get {
+            return UIColor(red: CGFloat(colorRed / 255), green: CGFloat(colorGreen / 255), blue: CGFloat(colorBlue / 255), alpha: 1.0)
+        }
+        set {
+            var red: CGFloat = 0
+            var green: CGFloat = 0
+            var blue: CGFloat = 0
+            var alpha: CGFloat = 0
+            newValue.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+            self.colorRed = UInt8(red * 255)
+            self.colorGreen = UInt8(green * 255)
+            self.colorBlue = UInt8(blue * 255)
+        }
+    }
+    
     private(set) var metaBalls: [MetaBall] = []
     
     override init(frame: CGRect) {
@@ -30,8 +50,6 @@ class MetaField: UIView {
         data = UnsafeMutablePointer<UInt8>.alloc(bytesPerRow * Int(frame.height))
         
         super.init(frame: rect)
-        
-        backgroundColor = UIColor.blackColor()
     }
     
     required init(coder aDecoder: NSCoder) {
@@ -72,10 +90,10 @@ class MetaField: UIView {
                 
                 // If the force is over the threshold, draw white
                 if totalForce > fieldThreshold {
-                    data[pointIndex + 0] = 255
-                    data[pointIndex + 1] = 255
-                    data[pointIndex + 2] = 255
-                    data[pointIndex + 3] = 255
+                    data[pointIndex + 0] = 1
+                    data[pointIndex + 1] = colorRed
+                    data[pointIndex + 2] = colorGreen
+                    data[pointIndex + 3] = colorBlue
                 }
             }
         }

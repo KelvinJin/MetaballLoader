@@ -15,7 +15,11 @@ let MaximumForce: CGFloat = 10000
 
 class MetaBall: NSObject {
     dynamic var center: CGPoint
-    var radius: CGFloat
+    var radius: CGFloat {
+        didSet {
+            self.mess = ForceConstant * CGFloat(M_PI) * radius * radius
+        }
+    }
     private(set) var mess: CGFloat
     
     init(center: CGPoint, radius: CGFloat) {

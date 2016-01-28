@@ -25,8 +25,6 @@ class MetaBall: NSObject {
     var borderPosition = GLKVector2Make(0, 0)
     var trackingPosition = GLKVector2Make(0, 0)
     var tracking = false
-    var borderPath: CGMutablePathRef!
-    var shapeLayer: CAShapeLayer = CAShapeLayer()
     
     convenience init(center: CGPoint, radius: CGFloat) {
         let centerVector = GLKVector2Make(Float(center.x), Float(center.y))
@@ -40,7 +38,8 @@ class MetaBall: NSObject {
     }
     
     func forceAt(position: GLKVector2) -> CGFloat {
-        let div = pow(distance(center, toPoint: position) , DistanceConstant)
+        let dis = distance(center, toPoint: position)
+        let div = dis * dis
         return div == 0 ? MaximumForce : mess / div
     }
 }

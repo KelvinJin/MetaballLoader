@@ -95,22 +95,35 @@ class MetaSpin: UIView {
     var maxAngle = CGFloat(2.0 * M_PI)
     var flip = false
     
+    private var pathPool: [Float: CGPath] = [:]
+    
     func moveSideBall() {
         nextAngle()
         
-        sideBall.center = newCenter(toEaseIn(toEaseIn(currentAngle)))
+        let adjustedAngle = toEaseIn(toEaseIn(currentAngle))
+        
+        sideBall.center = newCenter(adjustedAngle, relatedToCenter: centralBall.center)
+        
+        let centerIndex = sideBall.center.x * sideBall.center.y
+        
+        // We'll store the path and reuse it.
+        if pathPool[centerIndex] == nil {
+            pathPool[centerIndex] = metaField.pathForCurrentConfiguration()
+        }
+        
+        metaField.currentPath = pathPool[centerIndex]
         
         metaField.setNeedsDisplay()
     }
     
-    func newCenter(angle: CGFloat) -> GLKVector2 {
-        let x = centralBall.center.x + Float(cruiseRadius) * Float(flip ? -sin(angle) : sin(angle))
-        let y = centralBall.center.y + Float(flip ? cruiseRadius : -cruiseRadius) + Float(cruiseRadius) * Float(flip ? -cos(angle) : cos(angle))
+    func newCenter(angle: CGFloat, relatedToCenter center: GLKVector2) -> GLKVector2 {
+        let x = center.x + Float(cruiseRadius) * Float(flip ? -sin(angle) : sin(angle))
+        let y = center.y + Float(flip ? cruiseRadius : -cruiseRadius) + Float(cruiseRadius) * Float(flip ? -cos(angle) : cos(angle))
         
         return GLKVector2Make(x, y)
     }
     
-    private func nextAngle(){
+    private func nextAngle() {
         if currentAngle >= maxAngle {
             currentAngle = 0
             flip = !flip
@@ -122,7 +135,7 @@ class MetaSpin: UIView {
     
     private func toEaseIn(angle: CGFloat) -> CGFloat {
         let ratio = angle / CGFloat(2 * M_PI)
-        var processed_ratio: CGFloat = 0
+        var processed_ratio: CGFloat = ratio
         if ratio < 0.5 {
             processed_ratio =  (1 - pow(1 - ratio, 3.0)) * 8 / 14
         } else {

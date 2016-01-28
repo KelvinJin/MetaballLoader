@@ -13,11 +13,29 @@ private let rungKutaStep: Float = 1.0
 
 class MetaField: UIView {
     
-    var fieldThreshold: CGFloat = 0.04
+    let fieldThreshold: CGFloat = 0.04
     
-    var ballFillColor: UIColor = UIColor.blackColor()
+    var ballFillColor: UIColor = UIColor.blackColor() {
+        didSet {
+            pathLayer.fillColor = ballFillColor.CGColor
+        }
+    }
     
-    private var minSizeBall: CGFloat = 0
+    private var unitThreshold: CGFloat = 0
+    
+    var currentPath: CGPath? {
+        didSet {
+            pathLayer.path = currentPath
+        }
+    }
+    
+    private var pathLayer = CAShapeLayer()
+    
+    private var minSizeBall: CGFloat = 1000 {
+        didSet {
+            unitThreshold = fieldThreshold / minSizeBall
+        }
+    }
     
     private(set) var metaBalls: [MetaBall] = []
     
@@ -25,6 +43,10 @@ class MetaField: UIView {
         let rect = CGRect(x: frame.minX, y: frame.minY, width: CGFloat(Int(frame.width)), height: CGFloat(Int(frame.height)))
         
         super.init(frame: rect)
+        
+        pathLayer.fillColor = ballFillColor.CGColor
+        pathLayer.frame = bounds
+        layer.addSublayer(pathLayer)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -50,25 +72,24 @@ class MetaField: UIView {
             }
         }
     }
-    
-    override func drawRect(rect: CGRect) {
+
+    func pathForCurrentConfiguration() -> CGPath? {
         
-        let ctx = UIGraphicsGetCurrentContext()
-        CGContextSaveGState(ctx)
+        let path = CGPathCreateMutable()
         
         for metaBall in metaBalls {
             metaBall.trackingPosition = trackTheBorder(GLKVector2Add(metaBall.center, GLKVector2Make(0, 1)))
             metaBall.borderPosition = metaBall.trackingPosition
             
             metaBall.tracking = true
-            metaBall.borderPath = CGPathCreateMutable()
         }
         
         for metaBall in metaBalls {
             
-            CGContextMoveToPoint(ctx, CGFloat(metaBall.borderPosition.x), CGFloat(metaBall.borderPosition.y))
-            for i in 0..<1000 {
+            CGPathMoveToPoint(path, nil, CGFloat(metaBall.borderPosition.x), CGFloat(metaBall.borderPosition.y))
             
+            for i in 0..<1000 {
+                
                 if !metaBall.tracking {
                     break
                 }
@@ -87,7 +108,7 @@ class MetaField: UIView {
                 (metaBall.trackingPosition, tmp) = stepOnceTowardsBorder(metaBall.trackingPosition)
                 
                 
-                CGContextAddLineToPoint(ctx, CGFloat(metaBall.trackingPosition.x), CGFloat(metaBall.trackingPosition.y))
+                CGPathAddLineToPoint(path, nil, CGFloat(metaBall.trackingPosition.x), CGFloat(metaBall.trackingPosition.y))
                 
                 
                 // Check if we've gone a full circle or hit some other edge tracker
@@ -95,9 +116,9 @@ class MetaField: UIView {
                     if (otherBall !== metaBall || i > 3) && GLKVector2Distance(otherBall.borderPosition, metaBall.trackingPosition) < rungKutaStep {
                         // CGPathCloseSubpath(metaBall.borderPath)
                         if otherBall !== metaBall {
-                            CGContextAddLineToPoint(ctx, CGFloat(otherBall.borderPosition.x), CGFloat(otherBall.borderPosition.y))
+                            CGPathAddLineToPoint(path, nil, CGFloat(otherBall.borderPosition.x), CGFloat(otherBall.borderPosition.y))
                         } else {
-                            CGContextClosePath(ctx)
+                            CGPathCloseSubpath(path)
                         }
                         
                         metaBall.tracking = false
@@ -106,12 +127,7 @@ class MetaField: UIView {
             }
         }
         
-        // Add path into current context
-        ballFillColor.set()
-        
-        CGContextFillPath(ctx)
-        
-        CGContextRestoreGState(ctx)
+        return path
     }
     
     private func trackTheBorder(var position: GLKVector2) -> GLKVector2 {

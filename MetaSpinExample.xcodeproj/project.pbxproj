@@ -83,6 +83,7 @@
 		290540BA1AE6821800D74B8D /* MetaSpinExample */ = {
 			isa = PBXGroup;
 			children = (
+				29688A591C59C23200D5305B /* Metal */,
 				290540DD1AE6822800D74B8D /* Meta */,
 				290540BD1AE6821800D74B8D /* AppDelegate.swift */,
 				290540BF1AE6821800D74B8D /* ViewController.swift */,
@@ -127,6 +128,13 @@
 				290540E21AE6824900D74B8D /* MetaBall.swift */,
 			);
 			name = Meta;
+			sourceTree = "<group>";
+		};
+		29688A591C59C23200D5305B /* Metal */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Metal;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -375,6 +383,7 @@
 				INFOPLIST_FILE = MetaSpinExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 			};
 			name = Release;
 		};

@@ -19,8 +19,7 @@ class ViewController: UIViewController {
         metaSpin.ballFillColor = UIColor(red: 189/255, green: 195/255, blue: 199/255, alpha: 1.0)
         metaSpin.centralBallRadius = 50.0
         metaSpin.sideBallRadius = 15.0
-        metaSpin.speed = 0.02
-        metaSpin.frameInterval = 1
+        metaSpin.speed = 0.016
         
         view.backgroundColor = UIColor(red: 52/255, green: 73/255, blue: 94/255, alpha: 1.0)
         

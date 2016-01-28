@@ -32,7 +32,6 @@ class MetaSpin: UIView {
     
     // The following two variables will toggle the speed and the efficiency of the ball.
     var speed: CGFloat = 0.02
-    var frameInterval: Int = 1
     
     private var centralBall: MetaBall!
     private var sideBall: MetaBall!
@@ -85,8 +84,6 @@ class MetaSpin: UIView {
 //        
         
         let displayLink = CADisplayLink(target: self, selector: "moveSideBall")
-        
-        displayLink.frameInterval = frameInterval
         
         displayLink.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
     }

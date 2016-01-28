@@ -29,7 +29,10 @@ class MetaSpin: UIView {
             self.metaField.ballFillColor = ballFillColor
         }
     }
-    var speed: CGFloat = 0.06
+    
+    // The following two variables will toggle the speed and the efficiency of the ball.
+    var speed: CGFloat = 0.02
+    var frameInterval: Int = 1
     
     private var centralBall: MetaBall!
     private var sideBall: MetaBall!
@@ -50,7 +53,7 @@ class MetaSpin: UIView {
         addSubview(metaField)
     }
     
-    required init(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
     
@@ -83,7 +86,7 @@ class MetaSpin: UIView {
         
         let displayLink = CADisplayLink(target: self, selector: "moveSideBall")
         
-        // displayLink.frameInterval = 60 / 24
+        displayLink.frameInterval = frameInterval
         
         displayLink.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
     }

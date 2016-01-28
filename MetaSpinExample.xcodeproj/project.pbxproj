@@ -173,6 +173,8 @@
 		290540B01AE6821800D74B8D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftMigration = 0700;
+				LastSwiftUpdateCheck = 0700;
 				LastUpgradeCheck = 0630;
 				ORGANIZATIONNAME = uthoft;
 				TargetAttributes = {
@@ -429,6 +431,7 @@
 				290540D91AE6821900D74B8D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		290540DA1AE6821900D74B8D /* Build configuration list for PBXNativeTarget "MetaSpinExampleTests" */ = {
 			isa = XCConfigurationList;
@@ -437,6 +440,7 @@
 				290540DC1AE6821900D74B8D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

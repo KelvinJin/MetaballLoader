@@ -9,7 +9,7 @@
 import UIKit
 import GLKit
 
-private let rungKutaStep: Float = 5.0
+private let rungKutaStep: Float = 1.0
 
 class MetaField: UIView {
     
@@ -27,7 +27,7 @@ class MetaField: UIView {
         super.init(frame: rect)
     }
     
-    required init(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
     

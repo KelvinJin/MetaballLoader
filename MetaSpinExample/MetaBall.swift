@@ -40,7 +40,7 @@ class MetaBall: NSObject {
     }
     
     func forceAt(position: GLKVector2) -> CGFloat {
-        var div = pow(distance(center, position) , DistanceConstant)
+        let div = pow(distance(center, toPoint: position) , DistanceConstant)
         return div == 0 ? MaximumForce : mess / div
     }
 }

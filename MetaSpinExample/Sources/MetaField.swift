@@ -15,13 +15,13 @@ class MetaField: UIView {
     
     let fieldThreshold: CGFloat = 0.04
     
-    var ballFillColor: UIColor = UIColor.blackColor() {
+    var ballFillColor: UIColor = UIColor.black {
         didSet {
-            pathLayer.fillColor = ballFillColor.CGColor
+            pathLayer.fillColor = ballFillColor.cgColor
         }
     }
     
-    private var unitThreshold: CGFloat = 0
+    fileprivate var unitThreshold: CGFloat = 0
     
     var currentPath: CGPath? {
         didSet {
@@ -29,22 +29,22 @@ class MetaField: UIView {
         }
     }
     
-    private var pathLayer = CAShapeLayer()
+    fileprivate var pathLayer = CAShapeLayer()
     
-    private var minSizeBall: CGFloat = 1000 {
+    fileprivate var minSizeBall: CGFloat = 1000 {
         didSet {
             unitThreshold = fieldThreshold / minSizeBall
         }
     }
     
-    private(set) var metaBalls: [MetaBall] = []
+    fileprivate(set) var metaBalls: [MetaBall] = []
     
     override init(frame: CGRect) {
         let rect = CGRect(x: frame.minX, y: frame.minY, width: CGFloat(Int(frame.width)), height: CGFloat(Int(frame.height)))
         
         super.init(frame: rect)
         
-        pathLayer.fillColor = ballFillColor.CGColor
+        pathLayer.fillColor = ballFillColor.cgColor
         pathLayer.frame = bounds
         layer.addSublayer(pathLayer)
     }
@@ -53,18 +53,18 @@ class MetaField: UIView {
         super.init(coder: aDecoder)
     }
     
-    func addMetaBallAt(position: CGPoint, radius: CGFloat) {
+    func addMetaBallAt(_ position: CGPoint, radius: CGFloat) {
         let newBall = MetaBall(center: position, radius: radius)
         addMetaBall(newBall)
     }
     
-    func addMetaBall(metaBall: MetaBall) {
+    func addMetaBall(_ metaBall: MetaBall) {
         metaBalls.append(metaBall)
         updateMinSize()
         setNeedsDisplay()
     }
     
-    private func updateMinSize() {
+    fileprivate func updateMinSize() {
         minSizeBall = 100000
         for metaBall in metaBalls {
             if metaBall.mess < minSizeBall {
@@ -75,7 +75,7 @@ class MetaField: UIView {
 
     func pathForCurrentConfiguration() -> CGPath? {
         
-        let path = CGPathCreateMutable()
+        let path = CGMutablePath()
         
         for metaBall in metaBalls {
             metaBall.trackingPosition = trackTheBorder(GLKVector2Add(metaBall.center, GLKVector2Make(0, 1)))
@@ -86,7 +86,7 @@ class MetaField: UIView {
         
         for metaBall in metaBalls {
             
-            CGPathMoveToPoint(path, nil, CGFloat(metaBall.borderPosition.x), CGFloat(metaBall.borderPosition.y))
+            path.move(to: CGPoint(x: CGFloat(metaBall.borderPosition.x), y: CGFloat(metaBall.borderPosition.y)))
             
             for i in 0..<1000 {
                 
@@ -95,30 +95,25 @@ class MetaField: UIView {
                 }
                 
                 // Store the old tracking position
-                let oldPosition = metaBall.trackingPosition
-                
                 // Walk along the tangent
                 metaBall.trackingPosition = rungeKutta2(metaBall.trackingPosition, h: rungKutaStep, targetFunction: {
                     let tenant = self.tangentAt($0)
                     return tenant
                 })
                 
-                let tmp: CGFloat
                 // Correction step towards the border
-                (metaBall.trackingPosition, tmp) = stepOnceTowardsBorder(metaBall.trackingPosition)
+                (metaBall.trackingPosition, _) = stepOnceTowardsBorder(metaBall.trackingPosition)
                 
-                
-                CGPathAddLineToPoint(path, nil, CGFloat(metaBall.trackingPosition.x), CGFloat(metaBall.trackingPosition.y))
-                
+                path.addLine(to: CGPoint(x: CGFloat(metaBall.trackingPosition.x), y: CGFloat(metaBall.trackingPosition.y)))
                 
                 // Check if we've gone a full circle or hit some other edge tracker
                 for otherBall in metaBalls {
                     if (otherBall !== metaBall || i > 3) && GLKVector2Distance(otherBall.borderPosition, metaBall.trackingPosition) < rungKutaStep {
                         // CGPathCloseSubpath(metaBall.borderPath)
                         if otherBall !== metaBall {
-                            CGPathAddLineToPoint(path, nil, CGFloat(otherBall.borderPosition.x), CGFloat(otherBall.borderPosition.y))
+                            path.addLine(to: CGPoint(x: CGFloat(otherBall.borderPosition.x), y: CGFloat(otherBall.borderPosition.y)))
                         } else {
-                            CGPathCloseSubpath(path)
+                            path.closeSubpath()
                         }
                         
                         metaBall.tracking = false
@@ -130,7 +125,8 @@ class MetaField: UIView {
         return path
     }
     
-    private func trackTheBorder(var position: GLKVector2) -> GLKVector2 {
+    private func trackTheBorder(_ position: GLKVector2) -> GLKVector2 {
+        var position = position
         // Track the border of the metaball and return new coordinates
         var currentForce: CGFloat = 1000000
         
@@ -145,7 +141,7 @@ class MetaField: UIView {
         return position
     }
     
-    private func stepOnceTowardsBorder(position: GLKVector2) -> (GLKVector2, CGFloat) {
+    fileprivate func stepOnceTowardsBorder(_ position: GLKVector2) -> (GLKVector2, CGFloat) {
         // Step once towards the border of the metaball field, return the new coordinates and force at old coordinates.
         let force = forceAt(position)
         let np = normalAt(position)
@@ -155,14 +151,14 @@ class MetaField: UIView {
         return (GLKVector2Add(position, GLKVector2MultiplyScalar(np, Float(stepSize))), force)
     }
     
-    private func tangentAt(position: GLKVector2) -> GLKVector2 {
+    fileprivate func tangentAt(_ position: GLKVector2) -> GLKVector2 {
         // Normalized (length = 1) tangent at position
         let np = normalAt(position)
         
         return GLKVector2Make(-np.y, np.x)
     }
     
-    private func normalAt(position: GLKVector2) -> GLKVector2 {
+    fileprivate func normalAt(_ position: GLKVector2) -> GLKVector2 {
         // Normalized (length = 1) normal at position
         
         var totalNormal = GLKVector2Make(0, 0)
@@ -178,7 +174,7 @@ class MetaField: UIView {
         return GLKVector2Normalize(totalNormal)
     }
     
-    private func forceAt(position: GLKVector2) -> CGFloat {
+    fileprivate func forceAt(_ position: GLKVector2) -> CGFloat {
         var totalForce: CGFloat = 0
         
         // Loop through the meta balls and calculate the total force
@@ -189,7 +185,7 @@ class MetaField: UIView {
         return totalForce
     }
     
-    private func rungeKutta2(position: GLKVector2, h: Float, targetFunction: GLKVector2 -> GLKVector2) -> GLKVector2 {
+    fileprivate func rungeKutta2(_ position: GLKVector2, h: Float, targetFunction: (GLKVector2) -> GLKVector2) -> GLKVector2 {
         let oneTime = GLKVector2MultiplyScalar(targetFunction(position), h / 2)
         let nextInput = GLKVector2Add(position, oneTime)
         let twoTime = GLKVector2MultiplyScalar(targetFunction(nextInput), h)

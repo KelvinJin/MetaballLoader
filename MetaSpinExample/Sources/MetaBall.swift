@@ -20,7 +20,7 @@ class MetaBall: NSObject {
             self.mess = radius // ForceConstant * CGFloat(M_PI) * radius * radius
         }
     }
-    private(set) var mess: CGFloat
+    fileprivate(set) var mess: CGFloat
     
     var borderPosition = GLKVector2Make(0, 0)
     var trackingPosition = GLKVector2Make(0, 0)
@@ -37,13 +37,13 @@ class MetaBall: NSObject {
         self.mess = radius // ForceConstant * CGFloat(M_PI) * radius * radius
     }
     
-    func forceAt(position: GLKVector2) -> CGFloat {
+    func forceAt(_ position: GLKVector2) -> CGFloat {
         let dis = distance(center, toPoint: position)
         let div = dis * dis
         return div == 0 ? MaximumForce : mess / div
     }
 }
 
-func distance(fromPoint: GLKVector2, toPoint: GLKVector2) -> CGFloat {
+func distance(_ fromPoint: GLKVector2, toPoint: GLKVector2) -> CGFloat {
     return CGFloat(GLKVector2Distance(fromPoint, toPoint))
 }

@@ -24,7 +24,7 @@ class MetaSpin: UIView {
         }
     }
     var cruiseRadius: CGFloat = 50
-    var ballFillColor: UIColor = UIColor.whiteColor() {
+    var ballFillColor: UIColor = UIColor.white {
         didSet {
             self.metaField.ballFillColor = ballFillColor
         }
@@ -33,18 +33,18 @@ class MetaSpin: UIView {
     // The following two variables will toggle the speed and the efficiency of the ball.
     var speed: CGFloat = 0.02
     
-    private var centralBall: MetaBall!
-    private var sideBall: MetaBall!
-    private var metaField: MetaField!
+    fileprivate var centralBall: MetaBall!
+    fileprivate var sideBall: MetaBall!
+    fileprivate var metaField: MetaField!
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         
         // Set backgrounds
-        backgroundColor = UIColor.clearColor()
+        backgroundColor = UIColor.clear
         
         metaField = MetaField(frame: frame)
-        metaField.backgroundColor = UIColor.clearColor()
+        metaField.backgroundColor = UIColor.clear
         
         addCentralBall()
         addSideBall()
@@ -56,13 +56,13 @@ class MetaSpin: UIView {
         super.init(coder: aDecoder)
     }
     
-    private func addCentralBall() {
+    fileprivate func addCentralBall() {
         centralBall = MetaBall(center: center, radius: centralBallRadius)
         
         metaField.addMetaBall(centralBall)
     }
     
-    private func addSideBall() {
+    fileprivate func addSideBall() {
         sideBall = MetaBall(center: CGPoint(x: center.x, y: center.y), radius: sideBallRadius)
         
         metaField.addMetaBall(sideBall)
@@ -83,16 +83,16 @@ class MetaSpin: UIView {
 //        pathAnimation.delegate = self
 //        
         
-        let displayLink = CADisplayLink(target: self, selector: "moveSideBall")
+        let displayLink = CADisplayLink(target: self, selector: #selector(MetaSpin.moveSideBall))
         
-        displayLink.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
+        displayLink.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
     }
     
     var currentAngle = CGFloat(0)
     var maxAngle = CGFloat(2.0 * M_PI)
     var flip = false
     
-    private var pathPool: [Float: CGPath] = [:]
+    fileprivate var pathPool: [Float: CGPath] = [:]
     
     func moveSideBall() {
         nextAngle()
@@ -113,14 +113,14 @@ class MetaSpin: UIView {
         metaField.setNeedsDisplay()
     }
     
-    func newCenter(angle: CGFloat, relatedToCenter center: GLKVector2) -> GLKVector2 {
+    func newCenter(_ angle: CGFloat, relatedToCenter center: GLKVector2) -> GLKVector2 {
         let x = center.x + Float(cruiseRadius) * Float(flip ? -sin(angle) : sin(angle))
         let y = center.y + Float(flip ? cruiseRadius : -cruiseRadius) + Float(cruiseRadius) * Float(flip ? -cos(angle) : cos(angle))
         
         return GLKVector2Make(x, y)
     }
     
-    private func nextAngle() {
+    fileprivate func nextAngle() {
         if currentAngle >= maxAngle {
             currentAngle = 0
             flip = !flip
@@ -130,7 +130,7 @@ class MetaSpin: UIView {
         
     }
     
-    private func toEaseIn(angle: CGFloat) -> CGFloat {
+    fileprivate func toEaseIn(_ angle: CGFloat) -> CGFloat {
         let ratio = angle / CGFloat(2 * M_PI)
         var processed_ratio: CGFloat = ratio
         if ratio < 0.5 {
